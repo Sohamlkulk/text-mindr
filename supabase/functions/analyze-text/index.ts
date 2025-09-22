@@ -19,7 +19,7 @@ serve(async (req) => {
       throw new Error('Text is required and must be a string');
     }
 
-    // Simple text analysis logic
+    // Enhanced word analysis
     const words = text.toLowerCase().split(/\s+/).filter(word => word.length > 3);
     const wordFreq: { [key: string]: number } = {};
     
@@ -36,34 +36,82 @@ serve(async (req) => {
       .slice(0, 30)
       .map(([text, frequency]) => ({ text, frequency }));
 
-    // Simple sentiment analysis
-    const positiveWords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'love', 'best', 'awesome', 'perfect', 'happy', 'joy', 'beautiful', 'success', 'brilliant'];
-    const negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'worst', 'sad', 'angry', 'fail', 'problem', 'difficult', 'pain', 'wrong', 'error', 'ugly'];
+    // Enhanced sentiment analysis with more comprehensive word lists
+    const positiveWords = [
+      'good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'love', 'best', 'awesome', 'perfect', 
+      'happy', 'joy', 'beautiful', 'success', 'brilliant', 'outstanding', 'superb', 'delightful', 'impressive',
+      'premium', 'striking', 'bright', 'vivid', 'solid', 'smooth', 'win', 'sharp', 'fast', 'quick', 'durable'
+    ];
+    
+    const negativeWords = [
+      'bad', 'terrible', 'awful', 'horrible', 'hate', 'worst', 'sad', 'angry', 'fail', 'problem', 
+      'difficult', 'pain', 'wrong', 'error', 'ugly', 'disappointing', 'poor', 'slow', 'lacks', 
+      'limitations', 'limited', 'missing', 'broken', 'issues', 'concerns', 'weakness'
+    ];
 
     let positiveScore = 0;
     let negativeScore = 0;
+    let totalWords = words.length;
 
     words.forEach(word => {
       if (positiveWords.includes(word)) positiveScore++;
       if (negativeWords.includes(word)) negativeScore++;
     });
 
-    const totalSentimentWords = positiveScore + negativeScore;
+    // Calculate more nuanced sentiment score
     let sentimentScore = 0;
     let sentimentLabel = 'neutral';
 
-    if (totalSentimentWords > 0) {
-      sentimentScore = (positiveScore - negativeScore) / totalSentimentWords;
-      if (sentimentScore > 0.1) sentimentLabel = 'positive';
-      else if (sentimentScore < -0.1) sentimentLabel = 'negative';
+    if (totalWords > 0) {
+      const positiveRatio = positiveScore / totalWords;
+      const negativeRatio = negativeScore / totalWords;
+      
+      sentimentScore = (positiveRatio - negativeRatio) * 2; // Scale between -2 and 2
+      sentimentScore = Math.max(-1, Math.min(1, sentimentScore)); // Clamp to -1, 1
+      
+      if (sentimentScore > 0.15) sentimentLabel = 'positive';
+      else if (sentimentScore < -0.15) sentimentLabel = 'negative';
+      else sentimentLabel = 'neutral';
     }
 
-    // Create summary (first 2-3 sentences or key points)
+    // Enhanced text summarization - extract key sentences
     const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
-    const summary = sentences.slice(0, 3).join('. ').trim() + (sentences.length > 3 ? '...' : '');
+    let summary = "";
+    
+    if (sentences.length <= 3) {
+      summary = text.trim();
+    } else {
+      // Get first sentence, middle important sentence, and last sentence
+      const firstSentence = sentences[0].trim();
+      const lastSentence = sentences[sentences.length - 1].trim();
+      
+      // Find sentence with most important words
+      let bestSentence = sentences[1];
+      let maxScore = 0;
+      
+      for (let i = 1; i < sentences.length - 1; i++) {
+        const sentence = sentences[i];
+        let score = 0;
+        
+        // Score based on positive/negative words and high-frequency words
+        words.forEach(word => {
+          if (sentence.toLowerCase().includes(word)) {
+            if (positiveWords.includes(word) || negativeWords.includes(word)) score += 2;
+            if (wordFreq[word] > 1) score += 1;
+          }
+        });
+        
+        if (score > maxScore) {
+          maxScore = score;
+          bestSentence = sentence;
+        }
+      }
+      
+      summary = `${firstSentence}. ${bestSentence.trim()}. ${lastSentence}`;
+    }
 
     const analysisData = {
-      summary: summary || "Brief analysis of the provided text.",
+      summary: summary || "Key insights from the analyzed text.",
       sentiment_score: sentimentScore,
       sentiment_label: sentimentLabel,
       word_cloud_data: {
@@ -72,10 +120,12 @@ serve(async (req) => {
       analysis_data: {
         word_count: words.length,
         sentence_count: sentences.length,
+        positive_words_found: positiveScore,
+        negative_words_found: negativeScore,
         sentiment_distribution: {
-          positive: totalSentimentWords > 0 ? positiveScore / totalSentimentWords : 0.33,
-          negative: totalSentimentWords > 0 ? negativeScore / totalSentimentWords : 0.33,
-          neutral: totalSentimentWords > 0 ? (totalSentimentWords - positiveScore - negativeScore) / totalSentimentWords : 0.34
+          positive: positiveScore > 0 ? (positiveScore / (positiveScore + negativeScore + 1)) : 0.33,
+          negative: negativeScore > 0 ? (negativeScore / (positiveScore + negativeScore + 1)) : 0.33,
+          neutral: 1 - ((positiveScore + negativeScore) / (positiveScore + negativeScore + 1))
         }
       }
     };

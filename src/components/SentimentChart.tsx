@@ -55,18 +55,18 @@ export default function SentimentChart({ analysis }: SentimentChartProps) {
   const getSentimentIcon = (label: string) => {
     switch (label.toLowerCase()) {
       case 'positive':
-        return <Smile className="h-6 w-6 text-green-500" />;
+        return <Smile className="h-6 w-6 text-green-400" />;
       case 'negative':
-        return <Frown className="h-6 w-6 text-red-500" />;
+        return <Frown className="h-6 w-6 text-red-400" />;
       default:
-        return <Meh className="h-6 w-6 text-yellow-500" />;
+        return <Meh className="h-6 w-6 text-yellow-400" />;
     }
   };
 
   const getSentimentColor = (score: number) => {
-    if (score > 0.1) return 'text-green-500';
-    if (score < -0.1) return 'text-red-500';
-    return 'text-yellow-500';
+    if (score > 0.1) return 'text-green-400';
+    if (score < -0.1) return 'text-red-400';
+    return 'text-yellow-400';
   };
 
   return (
@@ -136,17 +136,27 @@ export default function SentimentChart({ analysis }: SentimentChartProps) {
           </ResponsiveContainer>
         </div>
 
-        {/* Sentiment Distribution */}
-        {analysis.analysis_data?.sentiment_distribution && (
+        {/* Additional Analysis Details */}
+        {analysis.analysis_data?.positive_words_found !== undefined && (
           <div className="space-y-4">
-            <h4 className="text-lg font-semibold">Sentiment Distribution</h4>
-            <div className="grid grid-cols-3 gap-4">
-              {Object.entries(analysis.analysis_data.sentiment_distribution).map(([key, value]: [string, any]) => (
-                <div key={key} className="text-center p-3 bg-muted/30 rounded-lg">
-                  <div className="text-lg font-bold capitalize">{key}</div>
-                  <div className="text-sm text-muted-foreground">{(value * 100).toFixed(1)}%</div>
-                </div>
-              ))}
+            <h4 className="text-lg font-semibold">Analysis Details</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-3 bg-muted/30 rounded-lg">
+                <div className="text-lg font-bold text-green-400">{analysis.analysis_data.positive_words_found}</div>
+                <div className="text-sm text-muted-foreground">Positive Words</div>
+              </div>
+              <div className="text-center p-3 bg-muted/30 rounded-lg">
+                <div className="text-lg font-bold text-red-400">{analysis.analysis_data.negative_words_found}</div>
+                <div className="text-sm text-muted-foreground">Negative Words</div>
+              </div>
+              <div className="text-center p-3 bg-muted/30 rounded-lg">
+                <div className="text-lg font-bold text-primary">{analysis.analysis_data.word_count}</div>
+                <div className="text-sm text-muted-foreground">Total Words</div>
+              </div>
+              <div className="text-center p-3 bg-muted/30 rounded-lg">
+                <div className="text-lg font-bold text-accent">{analysis.analysis_data.sentence_count}</div>
+                <div className="text-sm text-muted-foreground">Sentences</div>
+              </div>
             </div>
           </div>
         )}
