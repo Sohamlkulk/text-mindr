@@ -16,9 +16,9 @@ interface SentimentBreakdownProps {
 }
 
 const COLORS = {
-  positive: 'hsl(142 86% 55%)',
-  negative: 'hsl(0 84% 60%)',
-  neutral: 'hsl(213 27% 84%)'
+  positive: 'hsl(var(--primary))',
+  negative: 'hsl(var(--destructive))',
+  neutral: 'hsl(var(--muted-foreground))'
 };
 
 export default function SentimentBreakdown({ analysis }: SentimentBreakdownProps) {
@@ -37,57 +37,104 @@ export default function SentimentBreakdown({ analysis }: SentimentBreakdownProps
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-primary" />
-          Word Analysis
+          Emotional Landscape
         </CardTitle>
         <CardDescription>
-          Breakdown of sentiment-bearing words
+          The emotional tone woven through your words
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="h-48">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={40}
-                outerRadius={80}
-                paddingAngle={2}
-                dataKey="value"
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '6px',
-                  color: 'hsl(var(--card-foreground))'
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+        {/* Creative word analysis grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Positive words */}
+          <div className="relative p-4 rounded-lg bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200/50">
+            <div className="absolute top-2 right-2 text-green-600/20 text-3xl">😊</div>
+            <div className="space-y-2">
+              <div className="text-2xl font-bold text-green-600">{positive_words_found}</div>
+              <div className="text-sm font-medium text-green-700">Uplifting Words</div>
+              <div className="text-xs text-green-600/70">Bringing positive energy</div>
+            </div>
+          </div>
+          
+          {/* Negative words */}
+          <div className="relative p-4 rounded-lg bg-gradient-to-br from-red-50 to-rose-50 border border-red-200/50">
+            <div className="absolute top-2 right-2 text-red-600/20 text-3xl">😔</div>
+            <div className="space-y-2">
+              <div className="text-2xl font-bold text-red-600">{negative_words_found}</div>
+              <div className="text-sm font-medium text-red-700">Challenging Words</div>
+              <div className="text-xs text-red-600/70">Areas of concern</div>
+            </div>
+          </div>
+          
+          {/* Neutral/Total analysis */}
+          <div className="relative p-4 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200/50">
+            <div className="absolute top-2 right-2 text-blue-600/20 text-3xl">📊</div>
+            <div className="space-y-2">
+              <div className="text-2xl font-bold text-blue-600">{neutralWords}</div>
+              <div className="text-sm font-medium text-blue-700">Neutral Words</div>
+              <div className="text-xs text-blue-600/70">Objective content</div>
+            </div>
+          </div>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-3 bg-muted/30 rounded-lg">
-            <div className="text-lg font-bold text-emerald-400">{positive_words_found}</div>
-            <div className="text-sm text-muted-foreground">Positive</div>
+        {/* Creative donut chart */}
+        <div className="relative">
+          <div className="h-40">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={45}
+                  outerRadius={70}
+                  paddingAngle={4}
+                  dataKey="value"
+                  strokeWidth={2}
+                  stroke="hsl(var(--background))"
+                >
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} className="hover:opacity-80 transition-opacity" />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    color: 'hsl(var(--card-foreground))',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                  formatter={(value, name) => [`${value} words`, name]}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
-          <div className="text-center p-3 bg-muted/30 rounded-lg">
-            <div className="text-lg font-bold text-red-400">{negative_words_found}</div>
-            <div className="text-sm text-muted-foreground">Negative</div>
+          
+          {/* Center text overlay */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="text-center">
+              <div className="text-lg font-bold text-foreground">{word_count}</div>
+              <div className="text-xs text-muted-foreground">Total Words</div>
+            </div>
           </div>
-          <div className="text-center p-3 bg-muted/30 rounded-lg">
-            <div className="text-lg font-bold text-primary">{word_count}</div>
-            <div className="text-sm text-muted-foreground">Total Words</div>
+        </div>
+        
+        {/* Summary stats bar */}
+        <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
+          <div className="text-center">
+            <div className="text-sm font-medium text-muted-foreground">Sentences</div>
+            <div className="text-lg font-bold text-foreground">{sentence_count}</div>
           </div>
-          <div className="text-center p-3 bg-muted/30 rounded-lg">
-            <div className="text-lg font-bold text-accent">{sentence_count}</div>
-            <div className="text-sm text-muted-foreground">Sentences</div>
+          <div className="text-center">
+            <div className="text-sm font-medium text-muted-foreground">Avg. Length</div>
+            <div className="text-lg font-bold text-foreground">{Math.round(word_count / sentence_count)}</div>
+          </div>
+          <div className="text-center">
+            <div className="text-sm font-medium text-muted-foreground">Sentiment Ratio</div>
+            <div className="text-lg font-bold text-foreground">
+              {positive_words_found}:{negative_words_found}
+            </div>
           </div>
         </div>
       </CardContent>

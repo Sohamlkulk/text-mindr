@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Smile, Frown, Meh } from 'lucide-react';
+import { Heart, Brain, Zap, Star, CloudRain } from 'lucide-react';
 
 interface SentimentGaugeProps {
   score: number;
@@ -7,91 +7,115 @@ interface SentimentGaugeProps {
 }
 
 export default function SentimentGauge({ score, label }: SentimentGaugeProps) {
-  const getSentimentIcon = (label: string) => {
+  const getSentimentVisualization = (label: string, score: number) => {
+    const intensity = Math.abs(score);
+    
     switch (label.toLowerCase()) {
       case 'positive':
-        return <Smile className="h-8 w-8 text-emerald-400" />;
+        return {
+          icon: <Heart className="h-12 w-12 text-rose-400 animate-pulse" />,
+          emoji: '😊',
+          bgGradient: 'from-rose-100 to-pink-50',
+          description: intensity > 0.5 ? 'Absolutely Wonderful!' : 'Pretty Good Vibes',
+          particles: ['✨', '🌟', '💖', '🎉']
+        };
       case 'negative':
-        return <Frown className="h-8 w-8 text-red-400" />;
+        return {
+          icon: <CloudRain className="h-12 w-12 text-blue-400" />,
+          emoji: '😔',
+          bgGradient: 'from-blue-100 to-slate-50',
+          description: intensity > 0.5 ? 'Quite Challenging' : 'A Bit Rough',
+          particles: ['💧', '🌧️', '⛈️', '🌫️']
+        };
       default:
-        return <Meh className="h-8 w-8 text-amber-400" />;
+        return {
+          icon: <Brain className="h-12 w-12 text-amber-400" />,
+          emoji: '😐',
+          bgGradient: 'from-amber-100 to-yellow-50',
+          description: 'Perfectly Balanced',
+          particles: ['⚖️', '🤔', '📊', '🎯']
+        };
     }
   };
 
-  const getSentimentColor = (score: number) => {
-    if (score > 0.1) return 'text-emerald-400';
-    if (score < -0.1) return 'text-red-400';
-    return 'text-amber-400';
-  };
-
-  const getGaugeAngle = (score: number) => {
-    // Convert score from -1 to 1 range to 0 to 180 degrees
-    return ((score + 1) / 2) * 180;
-  };
-
-  const angle = getGaugeAngle(score);
+  const visualization = getSentimentVisualization(label, score);
+  
+  // Creative score bar
+  const scorePercentage = ((score + 1) / 2) * 100;
 
   return (
-    <Card className="gradient-card border-border/20 shadow-card">
-      <CardContent className="p-6">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="relative w-32 h-16">
-            {/* Gauge background */}
-            <svg className="w-full h-full" viewBox="0 0 120 60">
-              <path
-                d="M 10 50 A 50 50 0 0 1 110 50"
-                stroke="hsl(var(--muted))"
-                strokeWidth="8"
-                fill="none"
-                strokeLinecap="round"
-              />
-              {/* Negative section */}
-              <path
-                d="M 10 50 A 50 50 0 0 1 60 10"
-                stroke="hsl(var(--destructive))"
-                strokeWidth="6"
-                fill="none"
-                strokeLinecap="round"
-                opacity="0.3"
-              />
-              {/* Positive section */}
-              <path
-                d="M 60 10 A 50 50 0 0 1 110 50"
-                stroke="hsl(var(--primary))"
-                strokeWidth="6"
-                fill="none"
-                strokeLinecap="round"
-                opacity="0.3"
-              />
-              {/* Needle */}
-              <line
-                x1="60"
-                y1="50"
-                x2={60 + 35 * Math.cos((angle - 90) * (Math.PI / 180))}
-                y2={50 + 35 * Math.sin((angle - 90) * (Math.PI / 180))}
-                stroke={score > 0.1 ? 'hsl(var(--primary))' : score < -0.1 ? 'hsl(var(--destructive))' : 'hsl(var(--muted-foreground))'}
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-              {/* Center dot */}
-              <circle
-                cx="60"
-                cy="50"
-                r="4"
-                fill={score > 0.1 ? 'hsl(var(--primary))' : score < -0.1 ? 'hsl(var(--destructive))' : 'hsl(var(--muted-foreground))'}
-              />
-            </svg>
+    <Card className="relative overflow-hidden gradient-card border-border/20 shadow-card">
+      {/* Floating particles */}
+      <div className="absolute inset-0 pointer-events-none">
+        {visualization.particles.map((particle, index) => (
+          <div
+            key={index}
+            className="absolute text-lg opacity-20 animate-bounce"
+            style={{
+              left: `${20 + index * 20}%`,
+              top: `${10 + (index % 2) * 30}%`,
+              animationDelay: `${index * 0.5}s`,
+              animationDuration: `${2 + index * 0.5}s`
+            }}
+          >
+            {particle}
+          </div>
+        ))}
+      </div>
+      
+      <CardContent className="p-8 relative z-10">
+        <div className="text-center space-y-6">
+          {/* Creative header with emoji and icon */}
+          <div className="flex items-center justify-center gap-4">
+            <span className="text-4xl">{visualization.emoji}</span>
+            {visualization.icon}
           </div>
           
-          <div className="text-center space-y-2">
-            <div className="flex items-center justify-center gap-2">
-              {getSentimentIcon(label)}
-              <span className="text-lg font-bold capitalize">{label}</span>
+          {/* Creative score visualization */}
+          <div className="space-y-3">
+            <h3 className="text-xl font-bold capitalize text-foreground">
+              {label} Sentiment
+            </h3>
+            <p className="text-muted-foreground font-medium">
+              {visualization.description}
+            </p>
+          </div>
+          
+          {/* Creative score bar */}
+          <div className="space-y-2">
+            <div className="relative h-6 bg-muted/30 rounded-full overflow-hidden">
+              <div 
+                className="absolute left-0 top-0 h-full bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 transition-all duration-1000 ease-out"
+                style={{ width: `${scorePercentage}%` }}
+              />
+              <div 
+                className="absolute top-1/2 w-3 h-3 bg-white border-2 border-foreground rounded-full transform -translate-y-1/2 shadow-md transition-all duration-1000"
+                style={{ left: `calc(${scorePercentage}% - 6px)` }}
+              />
             </div>
-            <div className={`text-2xl font-bold ${getSentimentColor(score)}`}>
-              {score.toFixed(2)}
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Very Negative</span>
+              <span className="font-bold text-lg text-foreground">
+                {score.toFixed(2)}
+              </span>
+              <span>Very Positive</span>
             </div>
-            <p className="text-xs text-muted-foreground">Sentiment Score</p>
+          </div>
+          
+          {/* Creative meter with stars */}
+          <div className="flex justify-center gap-1">
+            {[1, 2, 3, 4, 5].map((star) => {
+              const threshold = (star - 3) * 0.4; // -0.8, -0.4, 0, 0.4, 0.8
+              const isActive = score > threshold;
+              return (
+                <Star
+                  key={star}
+                  className={`h-5 w-5 transition-all duration-300 ${
+                    isActive ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground/30'
+                  }`}
+                />
+              );
+            })}
           </div>
         </div>
       </CardContent>
