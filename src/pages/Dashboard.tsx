@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { LogOut, Upload, Download, History, Brain, BarChart3, MessageSquare } from 'lucide-react';
+import { LogOut, Upload, Download, History, Brain, BarChart3, MessageSquare, FileText } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import WordCloudComponent from '@/components/WordCloud';
 import SentimentChart from '@/components/SentimentChart';
@@ -39,6 +39,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [currentAnalysis, setCurrentAnalysis] = useState<Analysis | null>(null);
   const [analyses, setAnalyses] = useState<Analysis[]>([]);
+  const [fileUploading, setFileUploading] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -122,6 +123,41 @@ export default function Dashboard() {
       });
     }
     setLoading(false);
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.txt')) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload a .txt file only",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setFileUploading(true);
+    try {
+      const fileText = await file.text();
+      setText(fileText);
+      
+      toast({
+        title: "File Uploaded",
+        description: "Text file has been loaded successfully. Click 'Analyze Text' to proceed."
+      });
+    } catch (error) {
+      toast({
+        title: "Upload Failed",
+        description: "Failed to read the text file",
+        variant: "destructive"
+      });
+    }
+    setFileUploading(false);
+    
+    // Reset the input
+    event.target.value = '';
   };
 
   const handleSignOut = async () => {
@@ -227,13 +263,33 @@ export default function Dashboard() {
               onChange={(e) => setText(e.target.value)}
               className="min-h-32 bg-background/50 border-border transition-smooth focus:shadow-glow"
             />
-            <Button
-              onClick={analyzeText}
-              disabled={loading || !text.trim()}
-              className="gradient-primary transition-smooth hover:shadow-glow"
-            >
-              {loading ? "Analyzing..." : "Analyze Text"}
-            </Button>
+            
+            <div className="flex gap-3">
+              <div className="relative">
+                <input
+                  type="file"
+                  accept=".txt"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="file-upload"
+                />
+                <label
+                  htmlFor="file-upload"
+                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 cursor-pointer transition-smooth hover:shadow-glow"
+                >
+                  <FileText className="h-4 w-4" />
+                  {fileUploading ? "Uploading..." : "Upload .txt File"}
+                </label>
+              </div>
+              
+              <Button
+                onClick={analyzeText}
+                disabled={loading || !text.trim()}
+                className="gradient-primary transition-smooth hover:shadow-glow flex-1"
+              >
+                {loading ? "Analyzing..." : "Analyze Text"}
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
