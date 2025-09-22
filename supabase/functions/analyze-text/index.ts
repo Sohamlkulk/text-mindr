@@ -74,40 +74,50 @@ serve(async (req) => {
       else sentimentLabel = 'neutral';
     }
 
-    // Enhanced text summarization - extract key sentences
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
+    // Enhanced text summarization - extract key insights
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 15);
     let summary = "";
     
-    if (sentences.length <= 3) {
-      summary = text.trim();
+    if (sentences.length <= 2) {
+      summary = text.trim().substring(0, 200) + (text.length > 200 ? '...' : '');
+    } else if (sentences.length <= 3) {
+      summary = sentences.slice(0, 2).join('. ') + '.';
     } else {
-      // Get first sentence, middle important sentence, and last sentence
-      const firstSentence = sentences[0].trim();
-      const lastSentence = sentences[sentences.length - 1].trim();
-      
-      // Find sentence with most important words
-      let bestSentence = sentences[1];
-      let maxScore = 0;
-      
-      for (let i = 1; i < sentences.length - 1; i++) {
-        const sentence = sentences[i];
+      // Score sentences based on keyword density and sentiment words
+      const scoredSentences = sentences.map((sentence, index) => {
         let score = 0;
+        const sentenceWords = sentence.toLowerCase().split(/\s+/);
         
-        // Score based on positive/negative words and high-frequency words
-        words.forEach(word => {
-          if (sentence.toLowerCase().includes(word)) {
-            if (positiveWords.includes(word) || negativeWords.includes(word)) score += 2;
-            if (wordFreq[word] > 1) score += 1;
-          }
+        // Boost important sentences
+        if (index === 0) score += 3; // First sentence importance
+        if (index === sentences.length - 1) score += 2; // Last sentence importance
+        
+        // Score based on keyword frequency and sentiment
+        sentenceWords.forEach(word => {
+          if (wordFreq[word] && wordFreq[word] > 1) score += wordFreq[word];
+          if (positiveWords.includes(word) || negativeWords.includes(word)) score += 3;
         });
         
-        if (score > maxScore) {
-          maxScore = score;
-          bestSentence = sentence;
-        }
-      }
+        // Penalize very short or very long sentences
+        if (sentenceWords.length < 5) score -= 2;
+        if (sentenceWords.length > 30) score -= 1;
+        
+        return { sentence: sentence.trim(), score, index };
+      });
       
-      summary = `${firstSentence}. ${bestSentence.trim()}. ${lastSentence}`;
+      // Get top 2-3 sentences, maintaining original order
+      const topSentences = scoredSentences
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3)
+        .sort((a, b) => a.index - b.index)
+        .map(s => s.sentence);
+      
+      summary = topSentences.join('. ') + '.';
+      
+      // Ensure summary isn't too long
+      if (summary.length > 300) {
+        summary = topSentences.slice(0, 2).join('. ') + '.';
+      }
     }
 
     const analysisData = {

@@ -26,33 +26,43 @@ export default function WordCloudComponent({ analysis }: WordCloudProps) {
       </CardHeader>
       <CardContent>
         {words.length > 0 ? (
-          <div className="flex flex-wrap gap-3 justify-center items-center p-8 min-h-64 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg">
-            {words.map((word: { text: string; frequency: number }, index: number) => {
-              const size = Math.max(16, Math.min(40, word.frequency * 6));
-              const opacity = Math.max(0.7, Math.min(1, word.frequency / 8));
-              
-              return (
-                <span
-                  key={index}
-                  className="transition-smooth hover:scale-110 cursor-default font-semibold shadow-sm"
-                  style={{
-                    fontSize: `${size}px`,
-                    opacity,
-                    color: index % 4 === 0 
-                      ? 'hsl(var(--primary))' 
-                      : index % 4 === 1 
-                      ? 'hsl(var(--accent))' 
-                      : index % 4 === 2
-                      ? 'hsl(263 70% 60%)'  // Brighter purple
-                      : 'hsl(142 76% 50%)',  // Brighter green
-                    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                    filter: 'brightness(1.2) saturate(1.3)'
-                  }}
-                >
-                  {word.text}
-                </span>
-              );
-            })}
+          <div className="relative p-8 min-h-64 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg overflow-hidden">
+            <div className="grid grid-cols-4 gap-2 h-full">
+              {[0, 1, 2, 3].map(cluster => (
+                <div key={cluster} className="flex flex-col items-center justify-center gap-1">
+                  {words
+                    .filter((_, index) => index % 4 === cluster)
+                    .slice(0, Math.ceil(words.length / 4))
+                    .map((word: { text: string; frequency: number }, index: number) => {
+                      const size = Math.max(14, Math.min(32, word.frequency * 5));
+                      const opacity = Math.max(0.8, Math.min(1, word.frequency / 6));
+                      
+                      return (
+                        <span
+                          key={`${cluster}-${index}`}
+                          className="transition-all duration-300 hover:scale-125 cursor-default font-bold text-center leading-tight"
+                          style={{
+                            fontSize: `${size}px`,
+                            opacity,
+                            color: cluster === 0 
+                              ? 'hsl(217 91% 65%)'  // Bright blue
+                              : cluster === 1 
+                              ? 'hsl(142 86% 55%)'  // Bright green
+                              : cluster === 2
+                              ? 'hsl(263 85% 65%)'  // Bright purple  
+                              : 'hsl(25 95% 60%)',  // Bright orange
+                            textShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                            filter: 'brightness(1.3) saturate(1.4) contrast(1.1)',
+                            transform: `rotate(${(Math.random() - 0.5) * 15}deg)`
+                          }}
+                        >
+                          {word.text}
+                        </span>
+                      );
+                    })}
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="text-center py-12">
