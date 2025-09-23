@@ -117,6 +117,15 @@ export default function Auth() {
         <Sparkles className="h-14 w-14 text-primary animate-pulse delay-500" />
       </div>
       
+      {/* Admin Login Button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-smooth"
+        onClick={() => window.location.href = '/admin-auth'}
+      >
+        Admin
+      </Button>
       <Card className="w-full max-w-md gradient-card border-border/20 shadow-card relative z-10">
         <CardHeader className="text-center space-y-4">
           <div className="flex items-center justify-center gap-2">
