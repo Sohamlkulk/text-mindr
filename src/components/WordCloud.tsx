@@ -27,10 +27,15 @@ export default function WordCloudComponent({ analysis }: WordCloudProps) {
       <CardContent>
         {words.length > 0 ? (
           <div className="relative p-8 min-h-64 bg-gradient-to-br from-muted/20 to-muted/10 rounded-lg overflow-hidden">
-            <div className="flex flex-wrap justify-center items-center gap-2 h-full">
+            <div className="relative h-full w-full">
               {words.map((word: { text: string; frequency: number }, index: number) => {
                 const isKeyword = index < 5; // Top 5 words are keywords
                 const size = Math.max(14, Math.min(28, word.frequency * 6));
+                
+                // Random positioning for clustering/overlapping effect
+                const randomX = Math.random() * 80 + 10; // 10-90% to avoid edge cutoff
+                const randomY = Math.random() * 80 + 10;
+                const randomRotation = Math.random() * 30 - 15; // -15 to 15 degrees
                 
                 // Simple, clean color palette
                 const colors = [
@@ -44,14 +49,16 @@ export default function WordCloudComponent({ analysis }: WordCloudProps) {
                 return (
                   <span
                     key={index}
-                    className={`transition-all duration-300 hover:scale-110 cursor-default font-medium text-center leading-tight select-none ${
-                      isKeyword ? 'font-bold' : 'font-normal'
+                    className={`absolute transition-all duration-300 hover:scale-110 cursor-default font-medium leading-tight select-none whitespace-nowrap ${
+                      isKeyword ? 'font-bold z-20' : 'font-normal z-10'
                     }`}
                     style={{
                       fontSize: `${size}px`,
                       color: colors[index % colors.length],
                       opacity: isKeyword ? 0.9 : 0.7,
-                      margin: '2px 4px'
+                      left: `${randomX}%`,
+                      top: `${randomY}%`,
+                      transform: `translate(-50%, -50%) rotate(${randomRotation}deg)`
                     }}
                   >
                     {word.text}
