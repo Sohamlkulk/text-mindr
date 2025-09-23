@@ -30,7 +30,7 @@ export default function WordCloudComponent({ analysis }: WordCloudProps) {
             <div className="flex flex-wrap justify-center items-center gap-2 h-full">
               {words.map((word: { text: string; frequency: number }, index: number) => {
                 const isKeyword = index < 5; // Top 5 words are keywords
-                const size = Math.max(14, Math.min(28, word.frequency * 6));
+                const size = Math.max(24, Math.min(48, word.frequency * 8));
                 
                 // Simple, clean color palette
                 const colors = [
