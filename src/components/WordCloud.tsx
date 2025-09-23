@@ -26,39 +26,45 @@ export default function WordCloudComponent({ analysis }: WordCloudProps) {
       </CardHeader>
       <CardContent>
         {words.length > 0 ? (
-          <div className="relative p-8 min-h-64 bg-gradient-to-br from-muted/20 to-muted/10 rounded-lg overflow-hidden">
+          <div className="relative p-8 min-h-80 bg-gradient-to-br from-slate-900 to-slate-800 rounded-lg overflow-hidden">
             <div className="relative h-full w-full">
               {words.map((word: { text: string; frequency: number }, index: number) => {
                 const isKeyword = index < 5; // Top 5 words are keywords
-                const size = Math.max(14, Math.min(28, word.frequency * 6));
+                const size = Math.max(18, Math.min(36, word.frequency * 8)); // Increased font sizes
                 
-                // Random positioning for clustering/overlapping effect
-                const randomX = Math.random() * 80 + 10; // 10-90% to avoid edge cutoff
-                const randomY = Math.random() * 80 + 10;
-                const randomRotation = Math.random() * 30 - 15; // -15 to 15 degrees
+                // Better distributed random positioning
+                const randomX = Math.random() * 75 + 12.5; // 12.5-87.5% for better distribution
+                const randomY = Math.random() * 75 + 12.5;
+                const randomRotation = Math.random() * 20 - 10; // -10 to 10 degrees
                 
-                // Simple, clean color palette
+                // Vibrant color palette matching the reference
                 const colors = [
-                  'hsl(var(--primary))',
-                  'hsl(var(--secondary))',
-                  'hsl(var(--accent))',
-                  'hsl(var(--muted-foreground))',
-                  'hsl(var(--foreground))',
+                  '#00ff88', // bright green
+                  '#00aaff', // bright blue  
+                  '#ff6b6b', // bright red
+                  '#ffd93d', // bright yellow
+                  '#9b59b6', // purple
+                  '#e74c3c', // red
+                  '#3498db', // blue
+                  '#2ecc71', // green
+                  '#f39c12', // orange
+                  '#e67e22', // dark orange
                 ];
                 
                 return (
                   <span
                     key={index}
-                    className={`absolute transition-all duration-300 hover:scale-110 cursor-default font-medium leading-tight select-none whitespace-nowrap ${
-                      isKeyword ? 'font-bold z-20' : 'font-normal z-10'
+                    className={`absolute transition-all duration-300 hover:scale-110 cursor-default leading-tight select-none whitespace-nowrap ${
+                      isKeyword ? 'font-bold z-20' : 'font-semibold z-10'
                     }`}
                     style={{
                       fontSize: `${size}px`,
                       color: colors[index % colors.length],
-                      opacity: isKeyword ? 0.9 : 0.7,
+                      opacity: isKeyword ? 1 : 0.85,
                       left: `${randomX}%`,
                       top: `${randomY}%`,
-                      transform: `translate(-50%, -50%) rotate(${randomRotation}deg)`
+                      transform: `translate(-50%, -50%) rotate(${randomRotation}deg)`,
+                      textShadow: '0 0 10px rgba(0,0,0,0.3)'
                     }}
                   >
                     {word.text}
