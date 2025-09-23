@@ -30,11 +30,11 @@ export default function WordCloudComponent({ analysis }: WordCloudProps) {
             <div className="relative h-full w-full">
               {words.map((word: { text: string; frequency: number }, index: number) => {
                 const isKeyword = index < 5; // Top 5 words are keywords
-                const size = Math.max(18, Math.min(36, word.frequency * 8)); // Increased font sizes
+                const size = Math.max(24, Math.min(48, word.frequency * 10)); // Larger font sizes
                 
-                // Better distributed random positioning
-                const randomX = Math.random() * 75 + 12.5; // 12.5-87.5% for better distribution
-                const randomY = Math.random() * 75 + 12.5;
+                // More spread out positioning
+                const randomX = Math.random() * 90 + 5; // 5-95% for wider spread
+                const randomY = Math.random() * 90 + 5;
                 const randomRotation = Math.random() * 20 - 10; // -10 to 10 degrees
                 
                 // Vibrant color palette matching the reference
