@@ -26,45 +26,32 @@ export default function WordCloudComponent({ analysis }: WordCloudProps) {
       </CardHeader>
       <CardContent>
         {words.length > 0 ? (
-          <div className="relative p-8 min-h-80 bg-gradient-to-br from-slate-900 to-slate-800 rounded-lg overflow-hidden">
-            <div className="relative h-full w-full">
+          <div className="relative p-8 min-h-64 bg-gradient-to-br from-muted/20 to-muted/10 rounded-lg overflow-hidden">
+            <div className="flex flex-wrap justify-center items-center gap-2 h-full">
               {words.map((word: { text: string; frequency: number }, index: number) => {
                 const isKeyword = index < 5; // Top 5 words are keywords
-                const size = Math.max(24, Math.min(48, word.frequency * 10)); // Larger font sizes
+                const size = Math.max(14, Math.min(28, word.frequency * 6));
                 
-                // More spread out positioning
-                const randomX = Math.random() * 90 + 5; // 5-95% for wider spread
-                const randomY = Math.random() * 90 + 5;
-                const randomRotation = Math.random() * 20 - 10; // -10 to 10 degrees
-                
-                // Vibrant color palette matching the reference
+                // Simple, clean color palette
                 const colors = [
-                  '#00ff88', // bright green
-                  '#00aaff', // bright blue  
-                  '#ff6b6b', // bright red
-                  '#ffd93d', // bright yellow
-                  '#9b59b6', // purple
-                  '#e74c3c', // red
-                  '#3498db', // blue
-                  '#2ecc71', // green
-                  '#f39c12', // orange
-                  '#e67e22', // dark orange
+                  'hsl(var(--primary))',
+                  'hsl(var(--secondary))',
+                  'hsl(var(--accent))',
+                  'hsl(var(--muted-foreground))',
+                  'hsl(var(--foreground))',
                 ];
                 
                 return (
                   <span
                     key={index}
-                    className={`absolute transition-all duration-300 hover:scale-110 cursor-default leading-tight select-none whitespace-nowrap ${
-                      isKeyword ? 'font-bold z-20' : 'font-semibold z-10'
+                    className={`transition-all duration-300 hover:scale-110 cursor-default font-medium text-center leading-tight select-none ${
+                      isKeyword ? 'font-bold' : 'font-normal'
                     }`}
                     style={{
                       fontSize: `${size}px`,
                       color: colors[index % colors.length],
-                      opacity: isKeyword ? 1 : 0.85,
-                      left: `${randomX}%`,
-                      top: `${randomY}%`,
-                      transform: `translate(-50%, -50%) rotate(${randomRotation}deg)`,
-                      textShadow: '0 0 10px rgba(0,0,0,0.3)'
+                      opacity: isKeyword ? 0.9 : 0.7,
+                      margin: '2px 4px'
                     }}
                   >
                     {word.text}
